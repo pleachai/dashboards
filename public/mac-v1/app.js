@@ -8,20 +8,36 @@ const trunc = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 const clean = (t) => t.replace(/^(Bug|Feature|Improvement|UX|Release|Reliability|Cleanup|Auth|Compliance|Marketing|Onboarding|Rethink|Roles|Slack|Future):?\s*/i, '');
 const MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+async function tryJSON(url) {
+  const r = await fetch(url, { cache: 'no-store' });
+  const text = await r.text();
+  let j = null; try { j = JSON.parse(text); } catch (_) {}
+  return { ok: r.ok, status: r.status, json: j, isHtml: /^\s*</.test(text) };
+}
+
 async function load() {
-  let model;
-  try {
-    const r = await fetch(`/.netlify/functions/data?d=${SLUG}`, { cache: 'no-store' });
-    if (!r.ok) throw new Error('fn ' + r.status);
-    model = await r.json();
-    document.getElementById('src').textContent = 'live · Linear';
-  } catch (e) {
-    const r = await fetch('./data.json', { cache: 'no-store' });
-    model = await r.json();
-    document.getElementById('src').textContent = 'snapshot';
+  // 1) live function
+  const fn = await tryJSON(`/.netlify/functions/data?d=${SLUG}`);
+  if (fn.ok && fn.json && !fn.json.error) {
+    window.__model = fn.json; document.getElementById('src').textContent = 'live · Linear';
+    return render(fn.json);
   }
-  window.__model = model;
-  render(model);
+  const fnMsg = fn.json && fn.json.error ? `function: ${fn.json.error}`
+    : fn.isHtml ? `function not deployed (HTTP ${fn.status}, got HTML)`
+    : `function HTTP ${fn.status}`;
+
+  // 2) snapshot fallback
+  const sn = await tryJSON('./data.json');
+  if (sn.ok && sn.json) {
+    window.__model = sn.json; document.getElementById('src').textContent = 'snapshot (function down)';
+    return render(sn.json);
+  }
+  const snMsg = sn.isHtml ? `snapshot missing (HTTP ${sn.status})` : `snapshot HTTP ${sn.status}`;
+
+  document.getElementById('tab-board').innerHTML =
+    `<div class="verdict"><b>Couldn't load data.</b><br>Live → ${esc(fnMsg)}<br>Fallback → ${esc(snMsg)}` +
+    `<br><br>Most likely: set <b>LINEAR_API_KEY</b> in Netlify env vars, then redeploy. ` +
+    `If it says “not deployed”, confirm the functions directory is <code>netlify/functions</code>.</div>`;
 }
 
 function render(m) {
