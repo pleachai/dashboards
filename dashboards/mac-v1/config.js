@@ -4,6 +4,8 @@ module.exports = {
   slug: 'mac-v1',
   title: 'Mac v1',
   team: 'PLE',
+  mode: 'points',
+  project: '6e605e28-afb2-42dd-8121-09fd23b30d35', // Pleach Workforce
   // Milestone display name -> chart key/color/subtitle. Tickets are grouped by
   // their Linear projectMilestone name.
   milestones: {
