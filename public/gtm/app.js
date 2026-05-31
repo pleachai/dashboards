@@ -23,12 +23,21 @@ function show(m, mode) {
   document.getElementById('src').innerHTML = mode === 'live' ? '<i class="dot live"></i>live' : '<i class="dot"></i>snapshot';
   document.getElementById('updated').textContent = m.generatedAt ? new Date(m.generatedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
   const wd = workdaysBetween(m.startDate, m.target); const tgt = new Date(m.target);
+  const up = m.unphased || [];
+  const total = m.totalCount + up.length;
+  const done = m.doneCount + up.filter((t) => t.done).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
   const kpi = (v, l, c) => `<div class="k"><b ${c ? `style="color:${c}"` : ''}>${v}</b><small>${l}</small></div>`;
   document.getElementById('summary').innerHTML = `
-    <div class="prog"><div class="progtop"><span>${m.readyPct}% launch-ready</span><span>${m.doneCount} of ${m.totalCount} GTM items done</span></div>
-    <div class="track"><div class="fill" style="width:${m.readyPct}%"></div></div></div>
-    <div class="kpis">${kpi(m.totalCount, 'GTM items')}${kpi(m.doneCount + ' (' + m.readyPct + '%)', 'ready', '#5ee6a8')}${kpi(m.totalCount - m.doneCount, 'open')}${kpi(wd + 'd', 'to ' + MN[tgt.getUTCMonth()] + ' ' + tgt.getUTCDate())}</div>`;
-  document.getElementById('phases').innerHTML = `<div class="phases">${m.milestones.map(phase).join('')}</div>`;
+    <div class="prog"><div class="progtop"><span>${pct}% launch-ready</span><span>${done} of ${total} GTM items done${up.length ? ` · ${up.length} unphased` : ''}</span></div>
+    <div class="track"><div class="fill" style="width:${pct}%"></div></div></div>
+    <div class="kpis">${kpi(total, 'GTM items')}${kpi(done + ' (' + pct + '%)', 'ready', '#5ee6a8')}${kpi(total - done, 'open')}${up.length ? kpi(up.length, 'unphased', '#ffb454') : ''}${kpi(wd + 'd', 'to ' + MN[tgt.getUTCMonth()] + ' ' + tgt.getUTCDate())}</div>`;
+  let html = `<div class="phases">${m.milestones.map(phase).join('')}</div>`;
+  if (up.length) {
+    const items = up.map((t) => `<li class="chk ${t.done ? 'done' : ''}"><span class="box">${t.done ? '✓' : ''}</span><span class="ctitle">PLE-${t.n} · ${esc(t.title)}</span></li>`).join('');
+    html += `<div class="parked" style="display:block;margin-top:16px"><h3 style="margin-bottom:8px">⚠ Unphased — ${up.length} GTM issues not yet assigned to a phase</h3><ul class="checks" style="max-width:none">${items}</ul><p class="note">Assign these to <b>GTM Alpha / Beta / Launch</b> in Linear and they’ll move into the phase cards above.</p></div>`;
+  }
+  document.getElementById('phases').innerHTML = html;
 }
 
 function phase(g) {
