@@ -32,7 +32,7 @@ async function load() {
 }
 
 function show(m, mode) {
-  window.__model = m;
+  window.__model = m; window.__mode = mode;
   const dot = mode === 'live' ? '<i class="dot live"></i>live' : '<i class="dot"></i>snapshot';
   document.getElementById('src').innerHTML = dot;
   document.getElementById('updated').textContent = m.generatedAt ? new Date(m.generatedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
@@ -94,34 +94,40 @@ function board(m) {
 }
 
 /* ---------- shared burndown SVG ---------- */
+function themePal() {
+  return document.documentElement.dataset.theme === 'light'
+    ? { plot: '#eef2f7', weekend: '#e4e9f0', grid: '#d3dae3', minor: '#e6ebf1', axis: '#5d6b7d', trail: '#1a2330', ring: '#ffffff' }
+    : { plot: '#0c1116', weekend: '#10161d', grid: '#222b35', minor: '#1a222b', axis: '#7d8a9c', trail: '#ffffff', ring: '#0b0d10' };
+}
 function burndown({ total, days, series, deadlineIdx, phases, axisLabel, trail }) {
+  const P = themePal();
   const W = 1080, H = 420, ml = 50, mr = 16, mt = 24, mb = 42, pw = W - ml - mr, ph = H - mt - mb;
   const N = days.length - 1, maxPts = Math.max(25, Math.ceil(total / 25) * 25);
   const X = (i) => +(ml + (i / N) * pw).toFixed(1), Y = (p) => +(mt + (1 - p / maxPts) * ph).toFixed(1);
   const rem = (i, v) => Math.max(0, total - v * days[i].wd);
   const hit = (v) => { for (let i = 0; i < days.length; i++) if (rem(i, v) <= 0) return i; return N; };
-  let g = E('rect', { x: ml, y: mt, width: pw, height: ph, fill: '#0c1116', rx: 6 });
-  for (let i = 0; i < days.length - 1; i++) if (days[i].we) g += E('rect', { x: X(i), y: mt, width: (X(i + 1) - X(i)).toFixed(1), height: ph, fill: '#10161d' });
-  for (let p = 0; p <= maxPts; p += 25) g += E('line', { x1: ml, y1: Y(p), x2: W - mr, y2: Y(p), stroke: '#222b35', 'stroke-width': 1 }) + E('text', { x: ml - 7, y: Y(p) + 4, fill: '#7d8a9c', 'font-size': 11, 'text-anchor': 'end' }, p);
-  for (let i = 0; i < days.length; i++) { const d = days[i]; if (d.dow === 1 || i === 0) g += E('line', { x1: X(i), y1: mt, x2: X(i), y2: mt + ph, stroke: '#1a222b', 'stroke-width': 1 }) + E('text', { x: X(i), y: mt + ph + 16, fill: '#7d8a9c', 'font-size': 10, 'text-anchor': 'middle' }, `${MN[d.m]} ${d.day}`); }
+  let g = E('rect', { x: ml, y: mt, width: pw, height: ph, fill: P.plot, rx: 6 });
+  for (let i = 0; i < days.length - 1; i++) if (days[i].we) g += E('rect', { x: X(i), y: mt, width: (X(i + 1) - X(i)).toFixed(1), height: ph, fill: P.weekend });
+  for (let p = 0; p <= maxPts; p += 25) g += E('line', { x1: ml, y1: Y(p), x2: W - mr, y2: Y(p), stroke: P.grid, 'stroke-width': 1 }) + E('text', { x: ml - 7, y: Y(p) + 4, fill: P.axis, 'font-size': 11, 'text-anchor': 'end' }, p);
+  for (let i = 0; i < days.length; i++) { const d = days[i]; if (d.dow === 1 || i === 0) g += E('line', { x1: X(i), y1: mt, x2: X(i), y2: mt + ph, stroke: P.minor, 'stroke-width': 1 }) + E('text', { x: X(i), y: mt + ph + 16, fill: P.axis, 'font-size': 10, 'text-anchor': 'middle' }, `${MN[d.m]} ${d.day}`); }
   if (deadlineIdx != null && deadlineIdx >= 0) g += E('line', { x1: X(deadlineIdx), y1: mt - 4, x2: X(deadlineIdx), y2: mt + ph, stroke: '#ff5c7a', 'stroke-width': 2, 'stroke-dasharray': '1 0' }) + E('text', { x: X(deadlineIdx) - 6, y: mt + 7, fill: '#ff5c7a', 'font-size': 11, 'font-weight': 700, 'text-anchor': 'end' }, 'DEADLINE');
   for (const s of series) {
     let pts = `${X(0)},${Y(total)}`; for (let i = 0; i < days.length; i++) pts += ` ${X(i)},${Y(rem(i, s.v))}`;
     g += E('polyline', { points: pts, fill: 'none', stroke: s.color, 'stroke-width': s.w || 2.4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', ...(s.dash ? { 'stroke-dasharray': '3 4' } : {}) });
     if (s.landDot) { const idx = hit(s.v); g += E('circle', { cx: X(idx), cy: Y(0), r: 3.5, fill: s.color }) + E('text', { x: X(idx) + 5, y: Y(0) - 6, fill: s.color, 'font-size': 10 }, `${MN[days[idx].m]} ${days[idx].day}`); }
   }
-  for (const pm of phases || []) { let idx = N; for (let i = 0; i < days.length; i++) if (rem(i, pm.v) <= pm.thr + 1e-9) { idx = i; break; } g += E('circle', { cx: X(idx), cy: Y(rem(idx, pm.v)), r: 4, fill: pm.color, stroke: '#0b0d10', 'stroke-width': 1.5 }) + E('text', { x: X(idx) + 6, y: Y(rem(idx, pm.v)) - 6, fill: pm.color, 'font-size': 10, 'font-weight': 700 }, `${pm.label} ${MN[days[idx].m]}${days[idx].day}`); }
+  for (const pm of phases || []) { let idx = N; for (let i = 0; i < days.length; i++) if (rem(i, pm.v) <= pm.thr + 1e-9) { idx = i; break; } g += E('circle', { cx: X(idx), cy: Y(rem(idx, pm.v)), r: 4, fill: pm.color, stroke: P.ring, 'stroke-width': 1.5 }) + E('text', { x: X(idx) + 6, y: Y(rem(idx, pm.v)) - 6, fill: pm.color, 'font-size': 10, 'font-weight': 700 }, `${pm.label} ${MN[days[idx].m]}${days[idx].day}`); }
   // actual trail: real remaining points logged per day
   if (trail && trail.length) {
     const tp = trail.map((p) => ({ i: days.findIndex((d) => d.iso === p.date), v: p.remaining })).filter((p) => p.i >= 0);
     if (tp.length) {
-      g += E('polyline', { points: tp.map((p) => `${X(p.i)},${Y(p.v)}`).join(' '), fill: 'none', stroke: '#ffffff', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
-      for (const p of tp) g += E('circle', { cx: X(p.i), cy: Y(p.v), r: 3, fill: '#ffffff' });
+      g += E('polyline', { points: tp.map((p) => `${X(p.i)},${Y(p.v)}`).join(' '), fill: 'none', stroke: P.trail, 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+      for (const p of tp) g += E('circle', { cx: X(p.i), cy: Y(p.v), r: 3, fill: P.trail });
       const last = tp[tp.length - 1];
-      g += E('text', { x: X(last.i) + 6, y: Y(last.v) + 4, fill: '#fff', 'font-size': 10, 'font-weight': 700 }, `actual ${last.v}`);
+      g += E('text', { x: X(last.i) + 6, y: Y(last.v) + 4, fill: P.trail, 'font-size': 10, 'font-weight': 700 }, `actual ${last.v}`);
     }
   }
-  g += E('text', { x: ml, y: mt - 7, fill: '#6f7a8b', 'font-size': 10.5 }, axisLabel || 'points remaining');
+  g += E('text', { x: ml, y: mt - 7, fill: P.axis, 'font-size': 10.5 }, axisLabel || 'points remaining');
   return E('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${W} ${H}`, width: '100%', height: 'auto', style: 'display:block' }, g);
 }
 
@@ -154,10 +160,10 @@ function launch(m) {
   const five = hit(v), ten = hit(2 * v), remDL5 = remAt(dlIdx > 0 ? dlIdx - 1 : 0, v), missDays = days[five].wd - totalWD;
   const leg = (c, t) => `<span><i class="sw" style="background:${c}"></i>${t}</span>`;
   let pace = '';
-  if (hist.length >= 2) { const a = hist[0], b = hist[hist.length - 1]; const span = workdaysBetween(a.date, b.date) || 1; const ap = (a.remaining - b.remaining) / span; pace = leg('#ffffff', `Actual (~${ap > 0 ? ap.toFixed(1) : '0'}/d so far)`); }
-  else if (hist.length === 1) pace = leg('#ffffff', 'Actual (logging…)');
+  if (hist.length >= 2) { const a = hist[0], b = hist[hist.length - 1]; const span = workdaysBetween(a.date, b.date) || 1; const ap = (a.remaining - b.remaining) / span; pace = leg('var(--tx)', `Actual (~${ap > 0 ? ap.toFixed(1) : '0'}/d so far)`); }
+  else if (hist.length === 1) pace = leg('var(--tx)', 'Actual (logging…)');
   return `<div class="row">
-    <div class="card"><h3>🎯 Target vs actual <small>— required pace + your real trail</small></h3>${c1}<div class="legend">${leg('#5ee6a8', `Required (${vreq.toFixed(1)}/d)`)}${pace || '<span style="color:#6f7a8b">Actual trail builds daily (cron)</span>'}</div></div>
+    <div class="card"><h3>🎯 Target vs actual <small>— required pace + your real trail</small></h3>${c1}<div class="legend">${leg('#5ee6a8', `Required (${vreq.toFixed(1)}/d)`)}${pace || '<span style="color:var(--mut2)">Actual trail builds daily (cron)</span>'}</div></div>
     <div class="card"><h3>⚖️ Scenarios <small>— pace vs deadline</small></h3>${c2}<div class="legend">${leg('#5ee6a8', `Required (${vreq.toFixed(1)}/d)`)}${leg('#ffb454', `Solo (${v}/d)`)}${leg('#6ad0ff', `2 reviewers (${2 * v}/d)`)}</div></div>
   </div>
   <div class="callout">📉 <b>Verdict:</b> at ${v} pts/day you finish ~${MN[days[five].m]} ${days[five].day} — ${missDays > 0 ? `<b>~${missDays} working days late</b> (${remDL5} pts open on deadline)` : '<b>on time</b>'}. To hit it solo you need <b>${vreq.toFixed(1)} pts/day</b>${vreq > v ? ` (~${((vreq / v - 1) * 100).toFixed(0)}% above baseline)` : ''}.</div>
@@ -169,4 +175,5 @@ document.querySelectorAll('.tabbtn').forEach((b) => b.addEventListener('click', 
   document.querySelectorAll('.tabbtn').forEach((x) => x.classList.toggle('on', x === b));
   document.querySelectorAll('.tabpane').forEach((p) => p.classList.toggle('on', p.id === 'tab-' + b.dataset.t));
 }));
+addEventListener('themechange', () => { if (window.__model) show(window.__model, window.__mode || 'snapshot'); });
 load().catch((e) => { document.getElementById('tab-board').innerHTML = `<div class="callout">Failed to load: ${esc(e.message)}</div>`; });

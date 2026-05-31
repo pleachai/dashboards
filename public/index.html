@@ -4,21 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pleach Dashboards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>(function(){var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.dataset.theme=t;window.toggleTheme=function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('theme',n);var b=document.getElementById('themebtn');if(b)b.textContent=n==='light'?'☾':'☀';};addEventListener('DOMContentLoaded',function(){var b=document.getElementById('themebtn');if(b){b.textContent=document.documentElement.dataset.theme==='light'?'☾':'☀';b.onclick=window.toggleTheme;}});})();</script>
 <style>
+:root{--glow:#141b27;--bg:#0a0c10;--panel:#13181f;--panelb:#11161d;--line:#212a34;--line2:#1a222b;--tx:#e9eef5;--mut:#8a97a8;--mut2:#6f7a8b;--accent:#8b9bff;--beta:#6ad0ff}
+[data-theme="light"]{--glow:#e7edf7;--bg:#f4f7fb;--panel:#ffffff;--panelb:#f7f9fc;--line:#e0e6ee;--line2:#e9edf3;--tx:#1a2330;--mut:#5d6b7d;--mut2:#8492a3;--accent:#5566e6;--beta:#1f9fd0}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;background:#0b0d10;color:#e7ecf2;padding:48px;max-width:760px;margin:0 auto}
-h1{font-size:24px;margin-bottom:4px}h1 b{color:#7c8cff}
-p.sub{color:#8893a4;margin-bottom:28px}
-a.card{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;background:#12161c;border:1px solid #1f2630;border-radius:14px;padding:18px 20px;margin-bottom:12px}
-a.card:hover{border-color:#33405a}
-a.card .em{font-size:24px}
-a.card h2{font-size:16px}a.card p{font-size:12.5px;color:#8893a4}
-a.card .arr{margin-left:auto;color:#6f7a8b}
-.foot{margin-top:24px;font-size:12px;color:#6f7a8b}
+body{font:14px/1.5 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:radial-gradient(900px 400px at 80% -10%,var(--glow) 0%,rgba(0,0,0,0) 60%),var(--bg);color:var(--tx);padding:48px;max-width:760px;margin:0 auto;min-height:100vh}
+.top{display:flex;align-items:center;margin-bottom:4px}
+h1{font-size:24px;display:flex;align-items:center;gap:10px}h1 .logo{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--beta))}
+h1 b{background:linear-gradient(90deg,var(--accent),var(--beta));-webkit-background-clip:text;background-clip:text;color:transparent}
+.themebtn{margin-left:auto;font-size:15px;background:var(--panel);border:1px solid var(--line);color:var(--mut);border-radius:9px;padding:8px 11px;cursor:pointer}
+p.sub{color:var(--mut);margin:6px 0 28px}
+a.card{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;background:linear-gradient(180deg,var(--panel),var(--panelb));border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:.12s}
+a.card:hover{border-color:var(--accent);transform:translateY(-1px)}
+a.card .em{font-size:24px}a.card h2{font-size:16px}a.card p{font-size:12.5px;color:var(--mut)}a.card .arr{margin-left:auto;color:var(--mut2)}
+.foot{margin-top:24px;font-size:12px;color:var(--mut2)}.foot code{background:var(--panel);border:1px solid var(--line2);border-radius:4px;padding:1px 5px}
 </style>
 </head>
 <body>
-<h1><b>Pleach</b> Dashboards</h1>
+<div class="top">
+  <h1><span class="logo"></span><b>Pleach</b>&nbsp;Dashboards</h1>
+  <button id="themebtn" class="themebtn" title="Toggle light/dark" aria-label="Toggle theme">☀</button>
+</div>
 <p class="sub">Live business + delivery dashboards, sourced from Linear.</p>
 <a class="card" href="./launch/"><span class="em">🚀</span><div><h2>Launch Readiness</h2><p>Product + GTM vs the Jul 1 gate — go / no-go per phase</p></div><span class="arr">→</span></a>
 <a class="card" href="./mac-v1/"><span class="em">🖥️</span><div><h2>Mac v1 · Product</h2><p>Milestone board + burndown to the Jul 1 launch</p></div><span class="arr">→</span></a>
