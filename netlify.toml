@@ -1,0 +1,14 @@
+# Static site in public/, live data via a Netlify Function.
+[build]
+  command = "node scripts/snapshot.js"   # refresh the offline fallback at deploy time
+  publish = "public"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Pretty path: /mac-v1 -> function still reachable at /.netlify/functions/data
+[[redirects]]
+  from = "/api/data"
+  to = "/.netlify/functions/data"
+  status = 200
