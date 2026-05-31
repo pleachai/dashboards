@@ -1,0 +1,40 @@
+name: Daily burndown snapshot
+
+# Logs today's remaining points into public/<slug>/history.json and commits it,
+# building the actual-vs-ideal burndown trail over time. The commit also triggers
+# a Netlify redeploy. Requires repo secret LINEAR_API_KEY.
+on:
+  schedule:
+    - cron: '13 6 * * *'   # 06:13 UTC daily (off the :00 mark)
+  workflow_dispatch: {}     # manual "Run workflow" button
+
+permissions:
+  contents: write
+
+concurrency:
+  group: burndown-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Log remaining points
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+        run: node scripts/log-history.js
+      - name: Commit if changed
+        run: |
+          git config user.name "pleach-bot"
+          git config user.email "bot@pleach.ai"
+          git add public/*/history.json
+          if git diff --cached --quiet; then
+            echo "no change today"
+          else
+            git commit -m "chore: daily burndown snapshot [skip ci]"
+            git push
+          fi

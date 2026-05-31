@@ -16,12 +16,18 @@ async function tryJSON(url) {
   return { ok: r.ok, status: r.status, json: j, isHtml: /^\s*</.test(text) };
 }
 
+async function finish(m, mode) {
+  const h = await tryJSON('./history.json');
+  m.history = (h.json && Array.isArray(h.json.points)) ? h.json.points : [];
+  show(m, mode);
+}
+
 async function load() {
   const fn = await tryJSON(`/.netlify/functions/data?d=${SLUG}`);
-  if (fn.ok && fn.json && !fn.json.error) { return show(fn.json, 'live'); }
+  if (fn.ok && fn.json && !fn.json.error) { return finish(fn.json, 'live'); }
   const fnMsg = fn.json && fn.json.error ? `function: ${fn.json.error}` : fn.isHtml ? `function not deployed (HTTP ${fn.status})` : `function HTTP ${fn.status}`;
   const sn = await tryJSON('./data.json');
-  if (sn.ok && sn.json) { return show(sn.json, 'snapshot'); }
+  if (sn.ok && sn.json) { return finish(sn.json, 'snapshot'); }
   document.getElementById('tab-board').innerHTML = `<div class="callout"><b>Couldn't load data.</b><br>Live → ${esc(fnMsg)}<br>Fallback → ${esc(sn.isHtml ? 'snapshot missing (HTTP ' + sn.status + ')' : 'snapshot HTTP ' + sn.status)}</div>`;
 }
 
@@ -88,7 +94,7 @@ function board(m) {
 }
 
 /* ---------- shared burndown SVG ---------- */
-function burndown({ total, days, series, deadlineIdx, phases, axisLabel }) {
+function burndown({ total, days, series, deadlineIdx, phases, axisLabel, trail }) {
   const W = 1080, H = 420, ml = 50, mr = 16, mt = 24, mb = 42, pw = W - ml - mr, ph = H - mt - mb;
   const N = days.length - 1, maxPts = Math.max(25, Math.ceil(total / 25) * 25);
   const X = (i) => +(ml + (i / N) * pw).toFixed(1), Y = (p) => +(mt + (1 - p / maxPts) * ph).toFixed(1);
@@ -105,6 +111,16 @@ function burndown({ total, days, series, deadlineIdx, phases, axisLabel }) {
     if (s.landDot) { const idx = hit(s.v); g += E('circle', { cx: X(idx), cy: Y(0), r: 3.5, fill: s.color }) + E('text', { x: X(idx) + 5, y: Y(0) - 6, fill: s.color, 'font-size': 10 }, `${MN[days[idx].m]} ${days[idx].day}`); }
   }
   for (const pm of phases || []) { let idx = N; for (let i = 0; i < days.length; i++) if (rem(i, pm.v) <= pm.thr + 1e-9) { idx = i; break; } g += E('circle', { cx: X(idx), cy: Y(rem(idx, pm.v)), r: 4, fill: pm.color, stroke: '#0b0d10', 'stroke-width': 1.5 }) + E('text', { x: X(idx) + 6, y: Y(rem(idx, pm.v)) - 6, fill: pm.color, 'font-size': 10, 'font-weight': 700 }, `${pm.label} ${MN[days[idx].m]}${days[idx].day}`); }
+  // actual trail: real remaining points logged per day
+  if (trail && trail.length) {
+    const tp = trail.map((p) => ({ i: days.findIndex((d) => d.iso === p.date), v: p.remaining })).filter((p) => p.i >= 0);
+    if (tp.length) {
+      g += E('polyline', { points: tp.map((p) => `${X(p.i)},${Y(p.v)}`).join(' '), fill: 'none', stroke: '#ffffff', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+      for (const p of tp) g += E('circle', { cx: X(p.i), cy: Y(p.v), r: 3, fill: '#ffffff' });
+      const last = tp[tp.length - 1];
+      g += E('text', { x: X(last.i) + 6, y: Y(last.v) + 4, fill: '#fff', 'font-size': 10, 'font-weight': 700 }, `actual ${last.v}`);
+    }
+  }
   g += E('text', { x: ml, y: mt - 7, fill: '#6f7a8b', 'font-size': 10.5 }, axisLabel || 'points remaining');
   return E('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${W} ${H}`, width: '100%', height: 'auto', style: 'display:block' }, g);
 }
@@ -132,12 +148,16 @@ function launch(m) {
   const hit = (vv) => { for (let i = 0; i < days.length; i++) if (Math.max(0, total - vv * days[i].wd) <= 0) return i; return days.length - 1; };
   const remAt = (idx, vv) => Math.max(0, total - vv * days[idx].wd);
   let cum = 0; const phases = m.milestones.map((g) => { cum += g.pts; return { label: g.key + ' ✓', v: vreq, thr: total - cum, color: g.color }; });
-  const c1 = burndown({ total, days, deadlineIdx: dlIdx, series: [{ color: '#5ee6a8', v: vreq, w: 3 }], phases, axisLabel: `required pace ${vreq.toFixed(2)} pts/day` });
+  const hist = m.history || [];
+  const c1 = burndown({ total, days, deadlineIdx: dlIdx, series: [{ color: '#5ee6a8', v: vreq, w: 3 }], phases, trail: hist, axisLabel: `required pace ${vreq.toFixed(2)} pts/day` });
   const c2 = burndown({ total, days, deadlineIdx: dlIdx, series: [{ color: '#5ee6a8', v: vreq }, { color: '#ffb454', v, landDot: true }, { color: '#6ad0ff', v: 2 * v, dash: true, landDot: true }], axisLabel: 'pace scenarios vs deadline' });
   const five = hit(v), ten = hit(2 * v), remDL5 = remAt(dlIdx > 0 ? dlIdx - 1 : 0, v), missDays = days[five].wd - totalWD;
   const leg = (c, t) => `<span><i class="sw" style="background:${c}"></i>${t}</span>`;
+  let pace = '';
+  if (hist.length >= 2) { const a = hist[0], b = hist[hist.length - 1]; const span = workdaysBetween(a.date, b.date) || 1; const ap = (a.remaining - b.remaining) / span; pace = leg('#ffffff', `Actual (~${ap > 0 ? ap.toFixed(1) : '0'}/d so far)`); }
+  else if (hist.length === 1) pace = leg('#ffffff', 'Actual (logging…)');
   return `<div class="row">
-    <div class="card"><h3>🎯 Target burndown <small>— required pace + phase checkpoints</small></h3>${c1}</div>
+    <div class="card"><h3>🎯 Target vs actual <small>— required pace + your real trail</small></h3>${c1}<div class="legend">${leg('#5ee6a8', `Required (${vreq.toFixed(1)}/d)`)}${pace || '<span style="color:#6f7a8b">Actual trail builds daily (cron)</span>'}</div></div>
     <div class="card"><h3>⚖️ Scenarios <small>— pace vs deadline</small></h3>${c2}<div class="legend">${leg('#5ee6a8', `Required (${vreq.toFixed(1)}/d)`)}${leg('#ffb454', `Solo (${v}/d)`)}${leg('#6ad0ff', `2 reviewers (${2 * v}/d)`)}</div></div>
   </div>
   <div class="callout">📉 <b>Verdict:</b> at ${v} pts/day you finish ~${MN[days[five].m]} ${days[five].day} — ${missDays > 0 ? `<b>~${missDays} working days late</b> (${remDL5} pts open on deadline)` : '<b>on time</b>'}. To hit it solo you need <b>${vreq.toFixed(1)} pts/day</b>${vreq > v ? ` (~${((vreq / v - 1) * 100).toFixed(0)}% above baseline)` : ''}.</div>
