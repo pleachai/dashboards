@@ -1,0 +1,65 @@
+{
+  "projects": [
+    {
+      "name": "GTM",
+      "state": "started",
+      "total": 19,
+      "done": 8,
+      "openPts": 0,
+      "donePts": 0,
+      "pct": 42,
+      "slug": "gtm"
+    },
+    {
+      "name": "Pleach Cloud",
+      "state": "planned",
+      "total": 92,
+      "done": 0,
+      "openPts": 0,
+      "donePts": 0,
+      "pct": 0,
+      "slug": "pleach-cloud"
+    },
+    {
+      "name": "Pleach Workforce",
+      "state": "backlog",
+      "total": 123,
+      "done": 64,
+      "openPts": 134,
+      "donePts": 29,
+      "pct": 52,
+      "slug": "mac-v1"
+    },
+    {
+      "name": "bikecanada",
+      "state": "backlog",
+      "total": 9,
+      "done": 0,
+      "openPts": 0,
+      "donePts": 0,
+      "pct": 0,
+      "slug": null
+    },
+    {
+      "name": "Pleach Enterprise Dogfood",
+      "state": "backlog",
+      "total": 1,
+      "done": 0,
+      "openPts": 0,
+      "donePts": 0,
+      "pct": 0,
+      "slug": null
+    },
+    {
+      "name": "Workforce Windows App",
+      "state": "backlog",
+      "total": 1,
+      "done": 0,
+      "openPts": 0,
+      "donePts": 0,
+      "pct": 0,
+      "slug": null
+    }
+  ],
+  "generatedAt": "2026-06-05T02:08:38.400Z"
+}

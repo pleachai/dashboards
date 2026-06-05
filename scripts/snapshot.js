@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const registry = require('../lib/registry');
-const { buildModel } = require('../lib/linear');
+const { buildModel, buildPortfolio } = require('../lib/linear');
 
 // Best-effort: the snapshot is only the offline/local fallback. The live
 // Netlify function is the real data source, so never fail the build here —
@@ -13,6 +13,11 @@ const { buildModel } = require('../lib/linear');
     console.warn('[snapshot] LINEAR_API_KEY not set — skipping fallback snapshot (live function still serves data at runtime).');
     return;
   }
+  try {
+    const p = await buildPortfolio(); p.generatedAt = new Date().toISOString();
+    fs.writeFileSync(path.join(__dirname, '..', 'public', 'portfolio.json'), JSON.stringify(p, null, 2));
+    console.log(`snapshot portfolio: ${p.projects.length} projects`);
+  } catch (e) { console.warn('[snapshot] portfolio skipped:', e.message); }
   for (const slug of Object.keys(registry)) {
     try {
       const m = await buildModel(registry[slug]);

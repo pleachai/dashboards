@@ -6,32 +6,35 @@
 <title>Pleach Dashboards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
 <script>(function(){var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.dataset.theme=t;window.toggleTheme=function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=n;localStorage.setItem('theme',n);var b=document.getElementById('themebtn');if(b)b.textContent=n==='light'?'☾':'☀';};addEventListener('DOMContentLoaded',function(){var b=document.getElementById('themebtn');if(b){b.textContent=document.documentElement.dataset.theme==='light'?'☾':'☀';b.onclick=window.toggleTheme;}});})();</script>
-<style>
-:root{--glow:#141b27;--bg:#0a0c10;--panel:#13181f;--panelb:#11161d;--line:#212a34;--line2:#1a222b;--tx:#e9eef5;--mut:#8a97a8;--mut2:#6f7a8b;--accent:#8b9bff;--beta:#6ad0ff}
-[data-theme="light"]{--glow:#e7edf7;--bg:#f4f7fb;--panel:#ffffff;--panelb:#f7f9fc;--line:#e0e6ee;--line2:#e9edf3;--tx:#1a2330;--mut:#5d6b7d;--mut2:#8492a3;--accent:#5566e6;--beta:#1f9fd0}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font:14px/1.5 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:radial-gradient(900px 400px at 80% -10%,var(--glow) 0%,rgba(0,0,0,0) 60%),var(--bg);color:var(--tx);padding:48px;max-width:760px;margin:0 auto;min-height:100vh}
-.top{display:flex;align-items:center;margin-bottom:4px}
-h1{font-size:24px;display:flex;align-items:center;gap:10px}h1 .logo{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--beta))}
-h1 b{background:linear-gradient(90deg,var(--accent),var(--beta));-webkit-background-clip:text;background-clip:text;color:transparent}
-.themebtn{margin-left:auto;font-size:15px;background:var(--panel);border:1px solid var(--line);color:var(--mut);border-radius:9px;padding:8px 11px;cursor:pointer}
-p.sub{color:var(--mut);margin:6px 0 28px}
-a.card{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;background:linear-gradient(180deg,var(--panel),var(--panelb));border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:.12s}
-a.card:hover{border-color:var(--accent);transform:translateY(-1px)}
-a.card .em{font-size:24px}a.card h2{font-size:16px}a.card p{font-size:12.5px;color:var(--mut)}a.card .arr{margin-left:auto;color:var(--mut2)}
-.foot{margin-top:24px;font-size:12px;color:var(--mut2)}.foot code{background:var(--panel);border:1px solid var(--line2);border-radius:4px;padding:1px 5px}
-</style>
 </head>
 <body>
-<div class="top">
+<div class="head">
   <h1><span class="logo"></span><b>Pleach</b>&nbsp;Dashboards</h1>
+  <div class="meta-r"><div id="src">…</div><div id="updated"></div></div>
   <button id="themebtn" class="themebtn" title="Toggle light/dark" aria-label="Toggle theme">☀</button>
 </div>
-<p class="sub">Live business + delivery dashboards, sourced from Linear.</p>
-<a class="card" href="./launch/"><span class="em">🚀</span><div><h2>Launch Readiness</h2><p>Product + GTM vs the Jul 1 gate — go / no-go per phase</p></div><span class="arr">→</span></a>
-<a class="card" href="./mac-v1/"><span class="em">🖥️</span><div><h2>Mac v1 · Product</h2><p>Milestone board + burndown to the Jul 1 launch</p></div><span class="arr">→</span></a>
-<a class="card" href="./gtm/"><span class="em">📣</span><div><h2>GTM Readiness</h2><p>Go-to-market checklist by phase — % launch-ready</p></div><span class="arr">→</span></a>
-<p class="foot">Add a dashboard: new folder under <code>dashboards/</code> + a line in <code>lib/registry.js</code>, then link it here.</p>
+<p class="subt" style="font-size:12.5px;color:var(--mut);margin-bottom:18px">Live portfolio across every Linear project. Projects with a dashboard are clickable.</p>
+<div id="portfolio" class="portfolio">Loading…</div>
+<p class="note" style="max-width:820px">Add a dashboard: new <code>dashboards/&lt;slug&gt;/</code> + a line in <code>lib/registry.js</code> + a <code>public/&lt;slug&gt;/</code> folder, and map its project id in <code>lib/linear.js</code> (PROJECT_SLUG).</p>
+<script>
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+async function tryJSON(u){const r=await fetch(u,{cache:'no-store'});const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(_){}return{ok:r.ok,status:r.status,json:j};}
+function row(p){
+  const bar=`<div class="pbar"><i style="width:${p.pct}%"></i></div>`;
+  const inner=`<div class="pname">${esc(p.name)}<span class="pstate">${esc(p.state)}</span></div>${bar}<div class="ppct">${p.pct}%</div><div class="pmeta">${p.done}/${p.total} done</div>${p.slug?'<span class="arr">→</span>':'<span class="nodash" title="no dashboard">·</span>'}`;
+  return p.slug?`<a class="prow" href="./${p.slug}/">${inner}</a>`:`<div class="prow nolink">${inner}</div>`;
+}
+(async()=>{
+  let d=await tryJSON('/.netlify/functions/data?d=portfolio');let mode='live';
+  if(!(d.ok&&d.json&&d.json.projects)){d=await tryJSON('./portfolio.json');mode='snapshot';}
+  const el=document.getElementById('portfolio');
+  if(!(d.json&&d.json.projects)){el.innerHTML=`<div class="callout">Couldn't load portfolio (${esc(d.json&&d.json.error?d.json.error:'HTTP '+d.status)})</div>`;return;}
+  document.getElementById('src').innerHTML=mode==='live'?'<i class="dot live"></i>live':'<i class="dot"></i>snapshot';
+  document.getElementById('updated').textContent=d.json.generatedAt?new Date(d.json.generatedAt).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+  el.innerHTML=d.json.projects.map(row).join('');
+})();
+</script>
 </body>
 </html>

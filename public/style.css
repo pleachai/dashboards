@@ -123,4 +123,17 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}.ph{font-weight:700
 .tcell.go{border-color:var(--okbd)}.tcell.risk{border-color:var(--riskbd)}
 .verdictrow{font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;display:inline-block}
 .verdictrow.go{color:var(--okfg);background:var(--okbg)}.verdictrow.risk{color:var(--riskfg);background:var(--riskbg)}
-@media(max-width:900px){.row,.opts,.phases{grid-template-columns:1fr}.boardgrid{grid-template-columns:1fr}.col.beta ul{grid-template-columns:1fr}.gate{grid-template-columns:1fr}}
+/* portfolio hub */
+.portfolio{display:flex;flex-direction:column;gap:10px;max-width:820px}
+.prow{display:flex;align-items:center;gap:16px;background:linear-gradient(180deg,var(--panel),var(--panelb));border:1px solid var(--line);border-radius:14px;padding:15px 18px;text-decoration:none;color:inherit;transition:.12s}
+.prow:hover{border-color:var(--accent);transform:translateY(-1px)}
+.prow.nolink{cursor:default}.prow.nolink:hover{transform:none;border-color:var(--line)}
+.prow .pname{font-weight:700;font-size:15px;min-width:210px;display:flex;align-items:center;gap:9px}
+.pstate{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);background:var(--inset);border:1px solid var(--line2);border-radius:6px;padding:2px 7px;font-weight:600}
+.prow .pbar{flex:1;height:8px;background:var(--inset2);border:1px solid var(--line2);border-radius:99px;overflow:hidden;max-width:300px}
+.prow .pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--launch),var(--beta));border-radius:99px}
+.prow .ppct{font-weight:800;font-size:15px;min-width:44px;text-align:right}
+.prow .pmeta{font-size:11px;color:var(--mut);min-width:98px;text-align:right}
+.prow .arr{color:var(--mut2);width:16px;text-align:center}
+.nodash{font-size:10px;color:var(--mut2);width:16px;text-align:center}
+@media(max-width:900px){.row,.opts,.phases{grid-template-columns:1fr}.boardgrid{grid-template-columns:1fr}.col.beta ul{grid-template-columns:1fr}.gate{grid-template-columns:1fr}.prow .pname{min-width:130px}.prow .pbar{display:none}}
