@@ -13,27 +13,37 @@
     {
       "name": "Pleach Cloud",
       "state": "planned",
-      "total": 92,
-      "done": 0,
+      "total": 93,
+      "done": 3,
       "openPts": 0,
       "donePts": 0,
-      "pct": 0,
+      "pct": 3,
       "slug": "pleach-cloud"
     },
     {
       "name": "Pleach Workforce",
       "state": "backlog",
-      "total": 123,
-      "done": 64,
-      "openPts": 134,
-      "donePts": 29,
-      "pct": 52,
+      "total": 141,
+      "done": 94,
+      "openPts": 103,
+      "donePts": 37,
+      "pct": 67,
       "slug": "mac-v1"
     },
     {
       "name": "bikecanada",
       "state": "backlog",
-      "total": 9,
+      "total": 77,
+      "done": 15,
+      "openPts": 0,
+      "donePts": 0,
+      "pct": 19,
+      "slug": null
+    },
+    {
+      "name": "Founding TODOs",
+      "state": "backlog",
+      "total": 28,
       "done": 0,
       "openPts": 0,
       "donePts": 0,
@@ -51,6 +61,16 @@
       "slug": null
     },
     {
+      "name": "Workforce — Mac v2: Multi-Agent Runtime",
+      "state": "backlog",
+      "total": 21,
+      "done": 0,
+      "openPts": 0,
+      "donePts": 0,
+      "pct": 0,
+      "slug": null
+    },
+    {
       "name": "Workforce Windows App",
       "state": "backlog",
       "total": 1,
@@ -61,5 +81,5 @@
       "slug": null
     }
   ],
-  "generatedAt": "2026-06-05T02:08:38.400Z"
+  "generatedAt": "2026-06-11T13:11:23.080Z"
 }
