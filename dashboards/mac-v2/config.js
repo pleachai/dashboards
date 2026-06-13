@@ -1,11 +1,11 @@
-// Mac v2 — Multi-Agent Runtime. Readiness dashboard: each milestone is a phase;
-// each Linear issue in it is an item. % complete = done items / total items.
-// Hedge project (no hard deadline) — milestone progress, not a burndown.
+// Mac v2 — Multi-Agent Runtime. Points burndown: every issue carries a Fibonacci
+// estimate; scope = sum of points, % = donePts / scope, with a capacity + launch
+// burndown against the target date. Tickets are grouped by projectMilestone.
 module.exports = {
   slug: 'mac-v2',
   title: 'Mac v2 · Multi-Agent Runtime',
   team: 'PLE',
-  mode: 'readiness',
+  mode: 'points',
   project: '9a2c86fc-54ce-4bc5-b65c-0fc1f606d3fd', // Workforce — Mac v2: Multi-Agent Runtime
   // Keys MUST match the Linear projectMilestone names exactly.
   milestones: {
@@ -18,6 +18,6 @@ module.exports = {
   },
   parkedNumbers: [],
   startDate: '2026-06-11',
-  target: '2026-09-01', // soft horizon only — readiness dashboard, no burndown
-  velocity: 5,
+  target: '2026-09-01', // burndown deadline — adjust as the plan firms up
+  velocity: 5,          // baseline human-verification pace (pts / working day)
 };

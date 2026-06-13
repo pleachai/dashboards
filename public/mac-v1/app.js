@@ -40,6 +40,7 @@ function show(m, mode) {
   document.getElementById('tab-board').innerHTML = board(m);
   document.getElementById('tab-capacity').innerHTML = capacity(m);
   document.getElementById('tab-launch').innerHTML = launch(m);
+  { const el = document.getElementById('tab-modules'); if (el) el.innerHTML = modules(m); }
 }
 
 /* ---------- date helpers ---------- */
@@ -149,7 +150,7 @@ function capacity(m) {
 function launch(m) {
   const v = m.velocity, total = m.total;
   const totalWD = workdaysBetween(m.startDate, m.target), vreq = total / totalWD;
-  const days = buildDays(m.startDate, 41);
+  const days = buildDays(m.startDate, Math.max(41, Math.round((new Date(m.target) - new Date(m.startDate)) / 86400000) + 8));
   const dlIdx = days.findIndex((d) => d.iso === m.target);
   const hit = (vv) => { for (let i = 0; i < days.length; i++) if (Math.max(0, total - vv * days[i].wd) <= 0) return i; return days.length - 1; };
   const remAt = (idx, vv) => Math.max(0, total - vv * days[idx].wd);
@@ -168,6 +169,31 @@ function launch(m) {
   </div>
   <div class="callout">📉 <b>Verdict:</b> at ${v} pts/day you finish ~${MN[days[five].m]} ${days[five].day} — ${missDays > 0 ? `<b>~${missDays} working days late</b> (${remDL5} pts open on deadline)` : '<b>on time</b>'}. To hit it solo you need <b>${vreq.toFixed(1)} pts/day</b>${vreq > v ? ` (~${((vreq / v - 1) * 100).toFixed(0)}% above baseline)` : ''}.</div>
   <div class="opts"><div class="opt"><h4>① Add a 2nd reviewer</h4><p>${2 * v}/day → lands <span class="land">~${MN[days[ten].m]} ${days[ten].day}</span>. Big buffer.</p></div><div class="opt"><h4>② Lift solo pace to ${vreq.toFixed(1)}/day</h4><p>Faster review throughput. Tight, little slack.</p></div><div class="opt"><h4>③ Cut ~${remDL5} pts from Beta</h4><p>Defer trailing redesigns to fit at ${v}/day.</p></div></div>`;
+}
+
+function modules(m) {
+  const mods = (m.modules || []).filter((g) => g.openCount > 0);
+  if (!mods.length) return '<div class="callout">No module labels yet.</div>';
+  const maxOpen = Math.max(...mods.map((x) => x.openPts), 1);
+  const pal = ['#ff8a5c', '#6ad0ff', '#5ee6a8', '#b48ead', '#ffb454', '#7c8cff', '#8fa6b2', '#5ec8e6', '#ff5c7a', '#8b9bff', '#6ee7b7', '#f59e0b'];
+  const totOpen = mods.reduce((s, g) => s + g.openPts, 0);
+  const rows = mods.map((g, i) => {
+    const col = pal[i % pal.length];
+    const donePct = g.totalPts ? Math.round((g.donePts / g.totalPts) * 100) : 0;
+    const w = Math.round((g.openPts / maxOpen) * 100);
+    return `<tr>
+      <td class="ph"><i class="dotc" style="background:${col}"></i>${esc(g.name)}</td>
+      <td><div style="background:rgba(127,127,127,.18);border-radius:5px;overflow:hidden;height:13px;min-width:80px"><div style="width:${w}%;height:100%;background:${col}"></div></div></td>
+      <td class="n"><b>${g.openPts}</b></td>
+      <td class="n">${g.openCount}</td>
+      <td class="n">${g.donePts}</td>
+      <td class="n">${donePct}%</td>
+    </tr>`;
+  }).join('');
+  return `<div class="row"><div class="card"><h3>🧩 Open work by module <small>— worst first · ${totOpen} open pts across ${mods.length} modules</small></h3>
+    <table><tr><th>Module</th><th>Open work</th><th class="n">Open pts</th><th class="n">Open tk</th><th class="n">Done pts</th><th class="n">% done</th></tr>${rows}</table>
+    <p class="note">Open points per module across all phases — the longest bars are where the most unshipped work sits.</p>
+  </div></div>`;
 }
 
 /* ---------- tabs ---------- */

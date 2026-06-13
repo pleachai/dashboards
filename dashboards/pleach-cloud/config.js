@@ -1,10 +1,11 @@
-// Pleach Cloud roadmap dashboard. Sequential P0→P-Launch phases; each Linear
-// issue in a phase is a roadmap item. % built = done items / total items.
+// Pleach Cloud points burndown. Sequential P0→P-Launch phases; every issue carries
+// a Fibonacci estimate, scope = sum of points, % = donePts / scope, with a capacity
+// + launch burndown against the target date. Tickets grouped by projectMilestone.
 module.exports = {
   slug: 'pleach-cloud',
   title: 'Pleach Cloud',
   team: 'PLE',
-  mode: 'readiness',
+  mode: 'points',
   project: '6abec744-6563-4940-8ddc-f5e6c83a39c8', // Pleach Cloud
   milestones: {
     'P0 · Repo & account setup': { key: 'P0', color: '#8b9bff', sub: 'Foundation' },
@@ -17,5 +18,6 @@ module.exports = {
   },
   parkedNumbers: [],
   startDate: '2026-06-01',
-  // no target/velocity — this is a roadmap, not a date-gated burndown
+  target: '2026-09-01', // burndown deadline — adjust as the plan firms up
+  velocity: 5,          // baseline human-verification pace (pts / working day)
 };
