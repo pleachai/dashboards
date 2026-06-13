@@ -4,14 +4,14 @@
 const fs = require('fs');
 const path = require('path');
 const registry = require('../lib/registry');
-const { buildModel } = require('../lib/linear');
+const { buildModel, buildLaunch } = require('../lib/linear');
 
 (async () => {
   if (!process.env.LINEAR_API_KEY) { console.warn('[history] LINEAR_API_KEY not set — skipping.'); return; }
   const date = new Date().toISOString().slice(0, 10);
   for (const slug of Object.keys(registry)) {
     let m;
-    try { m = await buildModel(registry[slug]); } catch (e) { console.warn(`[history] ${slug} skipped: ${e.message}`); continue; }
+    try { const cfg = registry[slug]; m = cfg.aggregate ? await buildLaunch(cfg) : await buildModel(cfg); } catch (e) { console.warn(`[history] ${slug} skipped: ${e.message}`); continue; }
     const file = path.join(__dirname, '..', 'public', slug, 'history.json');
     let h = { points: [] };
     try { h = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (_) {}

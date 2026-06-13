@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pleach — Launch Readiness</title>
+<title>Pleach — Launch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
@@ -11,13 +11,21 @@
 </head>
 <body>
 <div class="head">
-  <h1><span class="logo"></span><b>Pleach</b>&nbsp;<span class="dim">· Launch Readiness</span></h1>
-  <div class="crumbs"><a href="../">All</a><a class="on" href="./">Launch</a><a href="../mac-v1/">Product</a><a href="../mac-v2/">Mac v2</a><a href="../gtm/">GTM</a><a href="../pleach-cloud/">Cloud</a></div>
+  <h1><span class="logo"></span><b>Pleach</b>&nbsp;<span class="dim">· Launch</span></h1>
+  <div class="crumbs"><a href="../">All</a><a class="on" href="./">Launch</a><a href="../mac-v1/">Mac v1</a><a href="../mac-v2/">Mac v2</a><a href="../gtm/">GTM</a><a href="../pleach-cloud/">Cloud</a></div>
+  <div class="tabs">
+    <button class="tabbtn on" data-t="burndown">Burndown</button>
+    <button class="tabbtn" data-t="breakdown">Breakdown</button>
+    <button class="tabbtn" data-t="modules">Modules</button>
+  </div>
   <div class="meta-r"><div id="src">…</div><div id="updated"></div></div>
   <button id="themebtn" class="themebtn" title="Toggle light/dark" aria-label="Toggle theme">☀</button>
 </div>
 <div id="summary"></div>
-<div id="gates">Loading…</div>
+<div id="tab-burndown" class="tabpane on">Loading…</div>
+<div id="tab-breakdown" class="tabpane"></div>
+<div id="tab-modules" class="tabpane"></div>
+<script src="../burndown.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>
