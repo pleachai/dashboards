@@ -34,7 +34,7 @@ function show(m, mode) {
     <div class="kpis">${kpi(total, 'GTM items')}${kpi(done + ' (' + pct + '%)', 'ready', '#5ee6a8')}${kpi(total - done, 'open')}${up.length ? kpi(up.length, 'unphased', '#ffb454') : ''}${kpi(wd + 'd', 'to ' + MN[tgt.getUTCMonth()] + ' ' + tgt.getUTCDate())}</div>`;
   let html = `<div class="phases">${m.milestones.map(phase).join('')}</div>`;
   if (up.length) {
-    const items = up.map((t) => `<li class="chk ${t.done ? 'done' : ''}"><span class="box">${t.done ? '✓' : ''}</span><span class="ctitle">PLE-${t.n} · ${esc(t.title)}</span></li>`).join('');
+    const items = up.map((t) => `<a class="chk ${t.done ? 'done' : ''}" href="https://linear.app/pleach/issue/PLE-${t.n}" target="_blank" rel="noopener"><span class="box">${t.done ? '✓' : ''}</span><span class="ctitle">PLE-${t.n} · ${esc(t.title)}</span></a>`).join('');
     html += `<div class="parked" style="display:block;margin-top:16px"><h3 style="margin-bottom:8px">⚠ Unphased — ${up.length} GTM issues not yet assigned to a phase</h3><ul class="checks" style="max-width:none">${items}</ul><p class="note">Assign these to <b>GTM Alpha / Beta / Launch</b> in Linear and they’ll move into the phase cards above.</p></div>`;
   }
   document.getElementById('phases').innerHTML = html;
@@ -43,7 +43,7 @@ function show(m, mode) {
 function phase(g) {
   const cls = { Alpha: 'alpha', Beta: 'beta', Launch: 'launch' }[g.key] || '';
   const items = (g.items || []).map((t) =>
-    `<li class="chk ${t.done ? 'done' : ''}"><span class="box">${t.done ? '✓' : ''}</span><span class="ctitle">${esc(t.title)}</span></li>`
+    `<a class="chk ${t.done ? 'done' : ''}" href="https://linear.app/pleach/issue/PLE-${t.n}" target="_blank" rel="noopener"><span class="box">${t.done ? '✓' : ''}</span><span class="ctitle">${esc(t.title)}</span></a>`
   ).join('');
   const body = g.items && g.items.length ? `<ul class="checks">${items}</ul>`
     : `<div class="empty">No GTM items yet — add issues to the “${esc(g.name)}” milestone in Linear and they’ll appear here.</div>`;

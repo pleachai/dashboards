@@ -76,7 +76,7 @@ function summary(m) {
 
 /* ---------- board ---------- */
 function ticket(t) {
-  return `<li class="it"><span class="pt">${t.est || '·'}</span><span class="id">PLE-${t.n}</span><span class="ti">${esc(trunc(clean(t.title), 52))}</span>${t.mod ? `<span class="tag">${esc(t.mod)}</span>` : ''}</li>`;
+  return `<a class="it" href="https://linear.app/pleach/issue/PLE-${t.n}" target="_blank" rel="noopener"><span class="pt">${t.est || '·'}</span><span class="id">PLE-${t.n}</span><span class="ti">${esc(trunc(clean(t.title), 52))}</span>${t.mod ? `<span class="tag">${esc(t.mod)}</span>` : ''}</a>`;
 }
 function milestoneCol(g) {
   const cls = { Alpha: 'alpha', Beta: 'beta', Launch: 'launch' }[g.key] || '';
