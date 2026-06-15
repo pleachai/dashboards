@@ -7,14 +7,16 @@ module.exports = {
   team: 'PLE',
   mode: 'points',
   project: '9a2c86fc-54ce-4bc5-b65c-0fc1f606d3fd', // Workforce — Mac v2: Multi-Agent Runtime
-  // Keys MUST match the Linear projectMilestone names exactly.
+  // Keys MUST match the Linear projectMilestone names exactly (Linear is the source of
+  // truth — if the team renames a milestone there, mirror it here or its tickets vanish).
   milestones: {
-    'M1 · The runtime seam':                    { key: 'M1',    color: '#6ad0ff', sub: 'Interface + event bus + tmux refactor · no user-visible change' },
-    'M2 · Structured on the subscription':      { key: 'M2',    color: '#5ee6a8', sub: 'Tool-call/diff observability on the sub · free win' },
-    'M-PROOF · Prove portability':              { key: 'PROOF', color: '#ffb454', sub: '★ Qwen-via-Bedrock end-to-end — this makes the hedge real' },
-    'M3 · SdkRuntime + structured experience':  { key: 'M3',    color: '#b48ead', sub: 'Agent-SDK adapter · steering · gating (metered)' },
-    'M4 · More backends & cloud':               { key: 'M4',    color: '#ff8a5c', sub: 'Codex/Qwen terminals · cloud location' },
-    'M5 · Views & mobile parity':               { key: 'M5',    color: '#8fa6b2', sub: 'Engine picker · chips · Settings → Engines · mobile' },
+    'M1 · The seam — interface · event bus · runtime families': { key: 'M1',    color: '#6ad0ff', sub: 'Interface · event bus · runtime families · no user-visible change' },
+    'M2 · Terminal observability — Claude CLI':                  { key: 'M2',    color: '#5ee6a8', sub: 'Tool-call/diff observability on the Claude CLI' },
+    'M-PROOF · Prove the hedge — a non-Claude backend':         { key: 'PROOF', color: '#ffb454', sub: '★ A non-Claude backend end-to-end — makes the hedge real' },
+    'M3 · Terminal backend #2 — Codex CLI':                      { key: 'M3',    color: '#b48ead', sub: 'Second terminal backend — Codex CLI' },
+    'M4 · SDK runtime + first driver — Claude Agent SDK':        { key: 'M4',    color: '#7c8cff', sub: 'SDK runtime + first driver — Claude Agent SDK' },
+    'M5 · More vendor SDK drivers':                              { key: 'M5',    color: '#ff8a5c', sub: 'More vendor SDK drivers' },
+    'M6 · Engine UX · cost · cloud · settings · mobile':         { key: 'M6',    color: '#8fa6b2', sub: 'Engine picker · cost · cloud · settings · mobile' },
   },
   parkedNumbers: [],
   startDate: '2026-06-11',

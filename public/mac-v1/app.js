@@ -91,7 +91,10 @@ function milestoneCol(g) {
 function board(m) {
   const cols = m.milestones.map(milestoneCol).join('');
   const parked = m.parked.length ? `<div class="parked"><h3>🅿️ Parked</h3><div class="pl">${m.parked.map(ticket).join('')}</div></div>` : '';
-  return `<div class="boardgrid">${cols}</div>${parked}`;
+  const orphan = (m.unphased && m.unphased.length)
+    ? `<div class="callout">⚠ <b>${m.unphased.length} ticket(s)</b> are in this project but match no configured milestone, so they are missing from the board + burndown — a milestone was likely renamed in Linear. Update this dashboard config. <span style="color:var(--mut)">${m.unphased.slice(0,10).map((t) => "PLE-" + t.n).join(", ")}${m.unphased.length > 10 ? "…" : ""}</span></div>`
+    : "";
+  return `${orphan}<div class="boardgrid">${cols}</div>${parked}`;
 }
 
 /* ---------- shared burndown SVG ---------- */
